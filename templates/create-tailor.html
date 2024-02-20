@@ -1,0 +1,201 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+<style>
+    #map {
+        width: 50%;
+        height: 400px;
+        /* Set the desired height */
+    }
+    .locationButton {
+    position: absolute;
+    top: 43px;
+    right: 10px;
+}
+.form-group{
+    position: relative;
+}
+.locationButton button {
+    border: unset;
+    background: unset;
+}
+</style>
+
+<div class="page-wrapper wrapper_page">
+    <div class="page-breadcrumb bg-white white_bg">
+        <div class="row align-items-center">
+            <div class="col-lg-9 col-md-4 col-sm-4 col-xs-12 mb-3">
+                <h4 class="page-title title_page">Create Tailor</h4>
+            </div>
+        </div>
+        <div class="dashboardBox">
+            <div class="container-fluid">
+                <div class="profile-input-box-area">
+                    {% if messages %}
+                    {% for message in messages %}
+                    {% if message.tags %}
+                    <script>swal("Tailor Find!", "{{message}}", "{{message.tags}}");</script>
+                    {% endif %}
+                    {% endfor %}
+                    {% endif %}
+                    <span type="text" id="message" class="info" contenteditable="false"></span>
+                    <form class="contact-form-main-area" action="" method="post" id="paymentFrm">
+                        <div class="row">
+                            <div class="col-lg-4">
+
+                                <div class="form-group">
+                                    <label>First Name</label>
+                                    <input type="text" maxlength="16" class="form-control field change_border"
+                                        name="first_name" placeholder="Enter First Name" autofocus="" id="first_name"
+                                        required>
+                                </div>
+
+
+                                <div class="form-group">
+                                    <label>Last Name</label>
+                                    <input type="text" maxlength="16" class="form-control field change_border"
+                                        name="last_name" placeholder="Enter Last Name" autofocus="" id="last_name"
+                                        required>
+
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>Phone</label>
+                                    <input type="number" maxlength="16" class="form-control field change_border"
+                                        name="phone" placeholder="Enter Phone With Country Code" autofocus="" id="phone"
+                                        required="">
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Location</label>
+                                    <input type="text" class="form-control field change_border" name="location"
+                                        placeholder="Enter Location" autofocus="" id="location" required>
+
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Openining Time</label>
+                                    <input type="time" onchange="onTimeChange1()"
+                                        class="form-control field change_border timepicker" name="open_timing"
+                                        autofocus="" id="open_timing">
+                                </div>
+
+
+                                <div class="form-group">
+                                    <label>Closing Time</label>
+                                    <input type="time" onchange="onTimeChange2()"
+                                        class="form-control field change_border timepicker" name="close_timing"
+                                        autofocus="" id="close_timing">
+                                </div>
+
+
+                                <div class="form-group">
+                                    <label>Closed Day</label>
+                                    <select class="form-control change_border" id="close_day" name="close_day" required>
+                                        {% for days in model.DAYS %}
+                                        <option value="{{ days.0 }}">{{ days.1 }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+
+                                <div class="contact-form-submint-btn-area">
+                                    <button type="submit" class="contact-form-submint-btn btn_submit">Submit</button>
+                                </div>
+
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="mapFull"  id="handleMap" >   
+
+                                    <h1>Click on the Map to Get Location</h1>
+                                    <div  id="map" style="width: 100%; height: 597px; "></div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+    const form = document.getElementById('paymentFrm');
+
+    form.addEventListener('submit', e => {
+        e.preventDefault();
+
+        $.ajax({
+            type: "POST",
+            url: "{% url 'create-tailor' %}",
+            data: {
+                phone: $('#phone').val(),
+                location: $('#location').val(),
+                firstName: $('#first_name').val(),
+                lastName: $('#last_name').val(),
+                open_timing: $('#open_timing').val(),
+                close_timing: $('#close_timing').val(),
+                close_day: $('#close_day').val(),
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                dataType: "json",
+
+            },
+            success: function (data) {
+                location.reload();
+            },
+            failure: function () {
+            }
+        });
+    });
+
+
+</script>
+<script>
+    var map = L.map('map').setView(['{{lat}}', '{{lon}}'], 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    map.on('click', function (e) {
+        var latitude = e.latlng.lat;
+        var longitude = e.latlng.lng;
+        $.ajax({
+            type: "POST",
+            url: "{% url 'convert_address' %}",
+            data: {
+                latitude: latitude,
+                longitude: longitude,
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+
+            },
+            success: function (data) {
+                document.getElementById('location').value = data.address
+
+            },
+            failure: function () {
+            }
+        });
+    });
+    function loadScript() {
+        var script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.src = 'https://maps.googleapis.com/maps/api/js?v=3' +
+            '&signed_in=true&callback=initialize';
+        document.body.appendChild(script);
+    }
+</script>
+<script>
+    $(document).ready(function () {
+        $('.timepicker').timepicker({
+            showMeridian: true, // Show AM/PM indicator
+            minuteStep: 1,      // Set minute step
+            defaultTime: false  // Set to the current time by default
+        });
+    });
+</script>
+ 
+
+{% endblock content %}

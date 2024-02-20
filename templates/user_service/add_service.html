@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+
+
+<div class="page-wrapper wrapper_page">
+    <div class="page-breadcrumb bg-white white_bg">
+        <div class="row align-items-center">
+            <div class="col-lg-9 col-md-4 col-sm-4 col-xs-12 mb-3">
+                <h4 class="page-title title_page">Select Categories</h4>
+            </div>
+        </div>
+        <div class="col-lg-12">
+            <div class="application-detail-heading-area ">
+                <h2 class="noti_detail">Tailor Detail</h2>
+            </div>
+            <div class="admin-detail-main-area">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="admin-detail-list-area">
+                            <div class="admin-name-img-area">
+                                <div class="admin-name-area">
+                                    <h4>{{tailor.user_id.phone}}</h4>
+                                </div>
+                            </div>
+                            <div class="admin-contact-detail-area">
+                                <h4>Name: <span>{{tailor.user_id.first_name|default:''}}
+                                        {{tailor.user_id.last_name|default:''}}</span></h4>
+                                <h4>Location: <span>{{tailor.user_id.location|default:''}}</span></h4>
+                                <h4>Date: <span>{{tailor.user_id.created_at}}</span></h4>
+                                <h4>category: <span>{{tailor.category_id.name}}</span></h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="dashboardBox mt-5">
+            <div class="container-fluid">
+                <div class="profile-input-box-area">
+                    {% if messages %}
+                    {% for message in messages %}
+                    {% if message.tags %}
+                    <script>swal("Tailor Find!", "{{message}}", "{{message.tags}}");</script>
+                    {% endif %}
+                    {% endfor %}
+                    {% endif %}
+                    <span type="text" id="message" class="info" contenteditable="false"></span>
+                    <form class="contact-form-main-area" action="" method="post" id="paymentFrm">
+                        {% csrf_token %}
+                        <div class="admin-appuser-table-area">
+                            <table class="table example1">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th>Sr No</th>
+                                        <th>Name</th>
+                                        <th>Type</th>
+                                        <th>price</th>
+                                        <th>gender</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% if services %}
+                                    {% for service in services %}
+                                    <tr>
+                                        <td><input type="checkbox" name="service" value="{{service.id}}" id=""></td>
+                                        <td>{{forloop.counter}}</td>
+                                        <td>{{service.name}}</td>
+                                        <td>{{service.type}}</td>
+                                        <td>{{service.price}}</td>
+                                        <td>{{service.gender}}</td>
+                                    </tr>
+                                    {% endfor %}
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <button type="submit">Add Service</button>                   
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
